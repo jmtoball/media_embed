@@ -1,34 +1,28 @@
+require_relative 'youtube'
+require_relative 'vimeo'
+require_relative 'soundcloud'
+
 module MediaEmbed
   module Handler
     CODE = -1
 
-    def embed(url, options = {})
-      return template_for(url, options)
+    def embed(url)
+      return choose_class(url)
     end
 
-    def thumbnail_url(url)
+    private
+
+    def choose_class(url)
       if match = youtube?(url)
-        "http://img.youtube.com/vi/#{match[CODE]}/0.jpg"
-      elsif match = vimeo?(url)
-        vimeo_video_json_url = "http://vimeo.com/api/v2/video/#{match[CODE]}.json"
-        JSON.parse(open(vimeo_video_json_url).read).first['thumbnail_large']
-      end
+         MediaEmbed::Youtube.new(url, match[CODE])
+       elsif match = vimeo?(url)
+         MediaEmbed::Vimeo.new(url, match[CODE])
+       elsif match = soundcloud?(url)
+         MediaEmbed::SoundCloud.new(url, match[CODE])
+       else
+         nil
+       end
     end
-
-    def template_for(url, options = {})
-      template = if match = youtube?(url)
-                   Video.youtube_template(match[CODE], options)
-                 elsif match = vimeo?(url)
-                   Video.vimeo_template(match[CODE], options)
-                 elsif match = soundcloud?(url)
-                   Podcast.soundcloud_template(match[CODE], options)
-                 else
-                   ''
-                 end
-
-      return template
-    end
-
 
     def youtube?(url)
       url.match youtube_regex

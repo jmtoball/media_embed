@@ -1,16 +1,11 @@
-module MediaEmbed
-  class Video
-    def self.youtube_template(code, options = {})
-      return iframe("//www.youtube.com/embed/#{code}/enablejsapi=1", options)
-    end
+require_relative 'media'
 
-    def self.vimeo_template(code, options = {})
-      return iframe("//player.vimeo.com/video/#{code}", options)
-    end
+module MediaEmbed
+  class Video < Media
 
     private
 
-    def self.iframe(source, options = {})
+    def iframe(source, options = {})
       "<iframe src='#{source}' #{options.map { |key, value| "#{key}='#{value}'" }.join(' ')}></iframe>"
     end
   end
