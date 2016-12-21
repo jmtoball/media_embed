@@ -6,6 +6,15 @@ module MediaEmbed
       return template_for(url, options)
     end
 
+    def thumbnail_url(url)
+      if match = youtube?(url)
+        "http://img.youtube.com/vi/#{match[CODE]}/0.jpg"
+      elsif match = vimeo?(url)
+        vimeo_video_json_url = "http://vimeo.com/api/v2/video/#{match[CODE]}.json"
+        JSON.parse(open(vimeo_video_json_url).read).first['thumbnail_large']
+      end
+    end
+
     def template_for(url, options = {})
       template = if match = youtube?(url)
                    Video.youtube_template(match[CODE], options)
